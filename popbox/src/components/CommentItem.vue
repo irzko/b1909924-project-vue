@@ -6,7 +6,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="mt-2 flex mx-2">
+  <div class="mb-2 flex mx-2">
     <Avatar :src="comment.author.avatar_url" height="8" width="8" />
 
     <div class="bg-gray-100 ml-2 flex flex-col rounded-xl px-2 py-1">

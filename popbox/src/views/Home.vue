@@ -1,18 +1,16 @@
 <script setup>
-import { ref, onMounted } from "vue";
-const posts = ref();
 import PostCard from "../components/PostCard.vue";
-import { useUserStore } from "../stores/user";
-const userStore = useUserStore();
 import axios from "axios";
 import { state } from "../socket";
+import { ref } from "vue";
 axios.get("http://localhost:3000/api/post").then((res) => {
   state.posts = res.data;
 });
 
-// onMounted(() => {
-
-// });
+const showEditForm = ref(false);
+const toggleEditForm = () => {
+  showEditForm.value = !showEditForm.value;
+};
 </script>
 
 <template>
@@ -22,6 +20,8 @@ axios.get("http://localhost:3000/api/post").then((res) => {
       v-for="post in state.posts"
       :post="post"
       :key="post._id"
+      :tg="toggleEditForm"
+      :sef="showEditForm"
     />
   </div>
 </template>

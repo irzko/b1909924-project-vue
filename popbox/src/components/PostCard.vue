@@ -6,17 +6,27 @@ import { useUserStore } from "../stores/user";
 import CommentItem from "./CommentItem.vue";
 const userStore = useUserStore();
 import { ref, onMounted } from "vue";
+import { socket } from "../socket";
+
 const props = defineProps({
   post: Object,
+  tg: {
+    type: Function,
+  },
+  sef: {
+    type: Boolean,
+  },
 });
 
-const like = ref(false);
-const isShow = ref(false);
+const likes = ref(props.post.likes);
+const comments = ref(props.post.comments);
+
+const isLike = ref(false);
+const isShowOption = ref(false);
 const commentValue = ref("");
 const toggleOption = () => {
-  isShow.value = !isShow.value;
+  isShowOption.value = !isShowOption.value;
 };
-
 const commentInput = ref(false);
 
 const showCommentInput = () => {
@@ -40,26 +50,37 @@ const getCreatedTime = (createdTime) => {
 };
 
 const verifyLike = () => {
-  if (props.post.likes.some((e) => e._id === userStore.user._id)) {
-    like.value = true;
+  if (likes.value.some((e) => e._id === userStore.user._id)) {
+    isLike.value = true;
   } else {
-    like.value = false;
+    isLike.value = false;
   }
 };
 
 verifyLike();
-// onMounted(() => {
-// });
+
+onMounted(() => {
+  socket.on(`ll-${props.post._id}`, (newLike) => {
+    likes.value = newLike;
+  });
+
+  socket.on(`lc-${props.post._id}`, (newComment) => {
+    comments.value = newComment;
+  });
+});
 
 const handleLike = () => {
-  if (!like.value) {
+  if (!isLike.value) {
     axios
       .post("http://localhost:3000/api/post/like", {
         postId: props.post._id,
         userId: userStore.user._id,
       })
       .then((res) => {
-        like.value = true;
+        socket.emit("like", {
+          postId: props.post._id,
+        });
+        isLike.value = true;
       })
       .catch((err) => {
         console.log(err);
@@ -71,7 +92,10 @@ const handleLike = () => {
         userId: userStore.user._id,
       })
       .then((res) => {
-        like.value = false;
+        socket.emit("unlike", {
+          postId: props.post._id,
+        });
+        isLike.value = false;
       })
       .catch((err) => {
         console.log(err);
@@ -87,7 +111,9 @@ const sendComment = () => {
       content: commentValue.value,
     })
     .then((res) => {
-      console.log(res.data);
+      socket.emit("comment", {
+        postId: props.post._id,
+      });
       commentValue.value = "";
     })
     .catch((err) => {
@@ -97,7 +123,13 @@ const sendComment = () => {
 </script>
 
 <template>
-  <PostOption :post="post" @toggle-option="toggleOption" v-if="isShow" />
+  <PostOption
+    :post="post"
+    :toggle-option="toggleOption"
+    v-if="isShowOption"
+    :tg="tg"
+    :sef="sef"
+  />
   <div class="rounded-xl my-4 bg-white border shadow-sm">
     <div class="p-2 flex justify-between">
       <div class="flex items-center">
@@ -125,7 +157,6 @@ const sendComment = () => {
         >
           <i class="ri-more-line ri-xl"></i>
         </button>
-        <!-- {dropdown ? <PostOption post={post} /> : <></>} -->
       </div>
     </div>
     <div class="px-2 mb-2">{{ post.content }}</div>
@@ -141,11 +172,11 @@ const sendComment = () => {
         />
       </div>
     </div>
-    <div v-if="post.likes.length" class="px-4 py-2 text-xs">
-      {{ post.likes.length }} lượt thích
+    <div v-if="likes.length" class="px-4 py-2 text-xs">
+      {{ likes.length }} lượt thích
     </div>
     <hr class="mx-4" />
-    <div class="grid grid-cols-3 p-1">
+    <div class="grid grid-cols-3 px-1 py-2">
       <button
         @click="handleLike"
         class="col-span-1 flex justify-center items-center"
@@ -153,12 +184,13 @@ const sendComment = () => {
         <i
           :class="[
             'ri-xl mr-2',
-            like ? 'text-red-500 ri-heart-fill' : 'ri-heart-line',
+            isLike ? 'text-red-500 ri-heart-fill' : 'ri-heart-line',
           ]"
         ></i>
-        <span :class="['font-medium', like ? 'text-red-500' : '']">Thích</span>
+        <span :class="['font-medium', isLike ? 'text-red-500' : '']"
+          >Thích</span
+        >
       </button>
-      <!-- <LikePost like={like} post={post} setLike={setLike} /> -->
 
       <div
         @click="showCommentInput"
@@ -172,42 +204,21 @@ const sendComment = () => {
         <span class="font-medium ml-2">Chia sẻ</span>
       </div>
     </div>
-    <!-- {post.ListComment && post.ListComment.length > 0 ? (
-        <hr class="mx-4" />
-      ) : (
-        <></>
-      )}
-      <div
-        class={clsx(
-          post.ListComment && post.ListComment.length > 0 ? "py-2" : ""
-        )}
-      >
-        {post && post.post_id ? (
-          <CommentManager postId={post.post_id} cmtList={post.ListComment} />
-        ) : (
-          <></>
-        )}
-      </div>
-      {post.post_id && toggleComment ? (
-        <InputComment post_id={post.post_id} />
-      ) : (
-        <></>
-      )} -->
+    <div :class="comments.length ? 'py-2' : ''">
+      <CommentItem
+        v-if="comments.length"
+        v-for="comment in comments"
+        :comment="comment"
+        :key="comment._id"
+      />
+    </div>
 
-    <CommentItem
-      v-if="post.comments.length"
-      v-for="comment in post.comments"
-      :comment="comment"
-      :key="comment._id"
-    />
-
-    <div className="mx-2 pb-2">
+    <div :class="commentInput ? 'mx-2 pb-2' : ''">
       <input
         v-if="commentInput"
         @keyup.enter="sendComment"
         @input="(event) => (commentValue = event.target.value)"
-        className="w-full rounded-full p-3 h-9 bg-gray-100
-      placeholder:text-black/80 focus:outline-none"
+        class="w-full rounded-full p-3 h-9 bg-gray-100 placeholder:text-black/80 focus:outline-none"
         type="text"
         :value="commentValue"
         placeholder="Viết bình luận"

@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const UserModel = require("../models/user.model");
+const { User } = require("../models/user.model");
 
 exports.login = async (req, res) => {
   const jwtSecret = "irzko";
@@ -16,7 +16,7 @@ exports.login = async (req, res) => {
     let b = Buffer.from(hash);
     let refresh_token = b.toString("base64");
     console.log(req.body.userId);
-    const user = await UserModel.findById(req.body.userId);
+    const user = await User.findById(req.body.userId);
 
     // res.status(201).send({
     //   _id: req.body.userId,

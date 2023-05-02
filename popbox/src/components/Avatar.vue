@@ -21,7 +21,7 @@ defineProps({
   <div>
     <img
       :src="src ? `http://localhost:3000/upload/${src}` : '/user.png'"
-      :class="['rounded-full', className, `h-${height} w-${width}`]"
+      :class="(['rounded-full', className, `h-${height} w-${width}`])"
       :alt="alt"
     />
   </div>

@@ -7,10 +7,24 @@ import axios from "axios";
 import { socket } from "../socket";
 const userStore = useUserStore();
 const textValue = ref("");
+
+const props = defineProps({
+  post: {
+    type: Object,
+    required: true,
+  },
+  tg: {
+    type: Function,
+    required: true,
+  },
+});
+
 const selectedFile = reactive({
   file: null,
   uri: null,
 });
+textValue.value = props.post.content;
+selectedFile.uri = props.post.file_url;
 
 const changeHandler = (e) => {
   selectedFile.file = e.target.files[0];
@@ -19,21 +33,12 @@ const changeHandler = (e) => {
 
 const handleSubmit = () => {
   axios
-    .post(
-      `http://localhost:3000/api/post`,
-      {
-        author: userStore.user._id,
-        content: textValue.value,
-        file: selectedFile.file,
-      },
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    )
+    .post(`http://localhost:3000/api/post/update`, {
+      postId: props.post._id,
+      content: textValue.value,
+    })
     .then(() => {
-      emit("toggleForm");
+      props.tg();
       socket.emit("create-post");
     })
     .catch((err) => {
@@ -52,10 +57,10 @@ const handleSubmit = () => {
       <div>
         <div>
           <div class="flex relative justify-center py-3 items-center">
-            <div class="font-medium">Tạo bài viết</div>
+            <div class="font-medium">Chỉnh sửa bài viết</div>
             <button
               class="absolute right-0 bg-gray-200 flex justify-center items-center w-8 h-8 rounded-full"
-              @click="$emit('toggleForm')"
+              @click="tg"
             >
               <i class="ri-close-line ri-xl"></i>
             </button>

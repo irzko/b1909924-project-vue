@@ -44,15 +44,19 @@ exports.getAll = (req, res) => {
     .populate("author")
     .populate("likes")
     .populate("comments.author")
+    .sort({ createdAt: -1 })
     .then((result) => {
       res.send(result);
     });
 };
 
-exports.getById = async (req, res) => {
-  Post.find({ author_id: req.params.IdPost }).then((result) => {
-    res.send(result);
-  });
+exports.getPostByUserId = async (req, res) => {
+  Post.find({ author: req.params.IdPost })
+    .populate("author")
+    .sort({ createdAt: -1 })
+    .then((result) => {
+      res.send(result);
+    });
 };
 
 exports.like = async (req, res) => {
@@ -81,6 +85,14 @@ exports.deletePost = (req, res) => {
     .catch((err) => {
       res.status(500).send(err);
     });
+};
+
+exports.updatePost = (req, res) => {
+  Post.findByIdAndUpdate(req.body.postId, { content: req.body.content }).then(
+    (result) => {
+      res.status(200).send("OK");
+    }
+  );
 };
 
 exports.comment = async (req, res) => {

@@ -5,8 +5,6 @@ export const state = reactive({
   posts: [],
 });
 
-// const URL =
-// process.env.NODE_ENV === "production" ? undefined : "http://localhost:3000";
 export const socket = io("http://localhost:3000/");
 
 socket.on("connect", () => {

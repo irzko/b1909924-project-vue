@@ -9,5 +9,10 @@ export const useUserStore = defineStore("user", {
     setUser(payload) {
       this.user = payload;
     },
+
+    logout() {
+      this.user = {};
+      localStorage.removeItem("user");
+    },
   },
 });

@@ -1,5 +1,5 @@
 const UserModel = require("../models/user.model");
-// const { User } = require("../models/user.model");
+const { User } = require("../models/user.model");
 const crypto = require("crypto");
 const multer = require("multer");
 const { access, constants } = require("fs");
@@ -12,14 +12,15 @@ exports.insert = (req, res, next) => {
     .digest("base64");
   req.body.password = salt + "$" + hash;
   req.body.permissionLevel = 1;
-  UserModel.createUser(req.body).then((result) => {
+  // UserModel.createUser(req.body).then((result) => {});
+  const user = new User(req.body);
+  user.save().then((result) => {
     res.status(201).send({ id: result._id });
   });
 };
 
 exports.getById = (req, res) => {
-  UserModel.findById(req.params.userId).then((result) => {
-    delete result.password;
+  User.findById(req.params.userId).then((result) => {
     res.status(200).send(result);
   });
 };
@@ -66,6 +67,18 @@ exports.changeEmail = async (req, res) => {
   res.status(201).send("Change email successfully!");
 };
 
-exports.getAllUser = async (req, res) => {
-  res.send(await User.find({}));
+exports.findUserByName = async (req, res) => {
+  User.find({ name: { $regex: ".*" + req.params.keyword + ".*" } }).then(
+    (result) => {
+      res.status(200).send(result);
+    }
+  );
+};
+
+exports.findUserByUsername = async (req, res) => {
+  User.findOne({ username: req.params.username }).then(
+    (result) => {
+      res.status(200).send(result);
+    }
+  );
 };

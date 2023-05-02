@@ -1,12 +1,6 @@
-// const router = require("express").Router();
-// const postsModel = require("../blogs/models/blogs.model");
+const router = require("express").Router();
+const UsersController = require("../controllers/users.controller");
 
-// router.get("/:keyword", async (req, res) => {
-//   if (req.params.keyword) {
-//     console.log(req.params.keyword);
-//     const result = await postsModel.search(req.params.keyword);
-//     return res.send(result);
-//   }
-// });
+router.get("/:keyword", [UsersController.findUserByName]);
 
-// module.exports = router;
+module.exports = router;

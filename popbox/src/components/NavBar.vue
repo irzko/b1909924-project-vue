@@ -1,10 +1,10 @@
 <script setup>
 import { useUserStore } from "../stores/user";
 import { useRouter } from "vue-router";
-import Avatar from "./Avatar.vue";
 import { ref } from "vue";
-const userStore = useUserStore();
 import NavItem from "./NavItem.vue";
+
+const userStore = useUserStore();
 const expandNavBar = ref(false);
 const expand = () => {
   expandNavBar.value = !expandNavBar.value;

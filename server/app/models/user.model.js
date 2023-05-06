@@ -32,36 +32,3 @@ userSchema.methods.toJSON = function () {
 const User = mongoose.model("User", userSchema);
 
 module.exports = { User };
-
-exports.createUser = (userData) => {
-  const user = new User(userData);
-  return user.save();
-};
-
-exports.findById = async (id) => {
-  const result = await User.findById(id);
-  // delete result._id;
-  // delete result.__v;
-  return result;
-};
-
-exports.changeAvt = async (body) => {
-  await User.findByIdAndUpdate(body._id, { avatar: body.avatar });
-};
-
-exports.changeName = async (id, fname, lname) => {
-  await User.findByIdAndUpdate(id, {
-    firstName: fname,
-    lastName: lname,
-  });
-};
-
-exports.changeEmail = async (id, email) => {
-  await User.findByIdAndUpdate(id, {
-    email: email,
-  });
-};
-
-// exports.getAll = async () => {
-//   return await User.find({});
-// };

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const UsersController = require("../controllers/users.controller");
+const UsersController = require("../controllers/user.controller");
 
 router.get("/:keyword", [UsersController.findUserByName]);
 

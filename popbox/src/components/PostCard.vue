@@ -15,7 +15,7 @@ const props = defineProps({
   },
   sef: {
     type: Boolean,
-  },
+  }, 
 });
 
 const likes = ref(props.post.likes);

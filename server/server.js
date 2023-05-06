@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 async function startServer() {
   try {
-    await mongoose.connect("mongodb://127.0.0.1/popbox");
+    await mongoose.connect("mongodb://127.0.0.1:27017/popbox");
     console.log("Connected to the database!");
 
     const PORT = config.app.port;

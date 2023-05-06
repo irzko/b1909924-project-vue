@@ -18,12 +18,12 @@ exports.login = async (req, res) => {
     console.log(req.body.userId);
     const user = await User.findById(req.body.userId);
 
-    // res.status(201).send({
-    //   _id: req.body.userId,
-    //   accessToken: token,
-    //   refreshToken: refresh_token,
-    // });
-    res.status(201).send(user);
+    res.status(201).send({
+      _id: req.body.userId,
+      accessToken: token,
+      refreshToken: refresh_token,
+    });
+    // res.status(201).send(user);
   } catch (err) {
     console.log(err);
     res.status(500).send({ errors: err });
